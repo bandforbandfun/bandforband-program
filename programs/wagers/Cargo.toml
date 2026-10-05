@@ -1,0 +1,30 @@
+[package]
+name = "wagers"
+version = "0.1.0"
+description = "bandforband.fun: open-source USDC vaults and contest escrow on Solana"
+edition = "2021"
+license = "Apache-2.0"
+repository = "https://github.com/bandforbandfun/bandforband-program"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "wagers"
+
+[features]
+default = []
+cpi = ["no-entrypoint"]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
+
+[dependencies]
+anchor-lang = { version = "1.2.0", features = ["init-if-needed"] }
+anchor-spl = { version = "1.2.0", default-features = false, features = ["token", "token_2022"] }
+solana-security-txt = "1.1"
+
+[dev-dependencies]
+proptest = "1.11"
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(target_os, values("solana"))'] }

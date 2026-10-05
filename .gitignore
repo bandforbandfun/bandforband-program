@@ -1,0 +1,9 @@
+target/
+.anchor/
+keys/
+**/*.so
+test-ledger/
+.DS_Store
+.env
+.env.*
+!.env.example
