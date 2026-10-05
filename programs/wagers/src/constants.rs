@@ -8,6 +8,10 @@ pub const ENTRY_SEED: &[u8] = b"entry";
 pub const BACKING_SEED: &[u8] = b"backing";
 pub const ORDER_SEED: &[u8] = b"order";
 pub const PLACEMENTS_SEED: &[u8] = b"placements";
+/// One mandate per owner and kind: `["mandate", owner, kind]`.
+pub const MANDATE_SEED: &[u8] = b"mandate";
+/// The only kind this program creates. The byte is the PDA seed.
+pub const MANDATE_KIND_VIP: u8 = 0;
 
 /// Hard cap for any fee the program will ever take, in bps (10%).
 pub const MAX_FEE_BPS: u16 = 1_000;
@@ -26,6 +30,12 @@ pub const MAX_JOIN_WINDOW_SECS: i64 = 8 * 24 * 60 * 60;
 pub const MAX_PREPARATION_SECS: i64 = 60 * 60;
 pub const MIN_REFUND_TIMEOUT_SECS: i64 = 24 * 60 * 60;
 pub const ORDER_RETENTION_SECS: i64 = 30 * 24 * 60 * 60;
+/// A mandate period cannot be shorter than a day (a buggy client must not arm a per-second debit).
+pub const MIN_MANDATE_PERIOD_SECS: i64 = 24 * 60 * 60;
+/// Covers 12 months of 31-day periods (372 days) with slack if `shop.vip.days` moves.
+pub const MAX_MANDATE_PERIOD_SECS: i64 = 400 * 24 * 60 * 60;
+/// First charge can sit past one period when VIP time is already stacked, but not forever.
+pub const MAX_MANDATE_HORIZON_SECS: i64 = 10 * 366 * 24 * 60 * 60;
 
 /// Layout version written into every account. Bump it when an upgrade changes what an
 /// account's bytes mean, and teach `migrate_account` how to bring older ones forward.
@@ -53,8 +63,9 @@ mod tests {
             BACKING_SEED,
             ORDER_SEED,
             PLACEMENTS_SEED,
+            MANDATE_SEED,
         ];
-        let expected: [&[u8]; 10] = [
+        let expected: [&[u8]; 11] = [
             b"config",
             b"rewards",
             b"vault",
@@ -65,6 +76,7 @@ mod tests {
             b"backing",
             b"order",
             b"placements",
+            b"mandate",
         ];
         assert_eq!(seeds, expected);
     }

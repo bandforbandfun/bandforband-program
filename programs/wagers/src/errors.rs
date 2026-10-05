@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 
 #[error_code]
 pub enum WagersError {
-    #[msg("Program is paused for new contests, backings and purchases")]
+    #[msg("Program is paused for new contests, backings, purchases and mandate charges")]
     Paused,
     #[msg("Only the config admin can do this")]
     NotAdmin,
@@ -72,4 +72,12 @@ pub enum WagersError {
     VaultNotClosable,
     #[msg("The contest's placement book must be passed")]
     MissingPlacementBook,
+    #[msg("Only the biller can do this")]
+    NotBiller,
+    #[msg("Only the mandate owner or the biller can do this")]
+    NotMandateAuthority,
+    #[msg("Mandate charge is not due yet")]
+    MandateNotDue,
+    #[msg("Invalid mandate")]
+    InvalidMandate,
 }

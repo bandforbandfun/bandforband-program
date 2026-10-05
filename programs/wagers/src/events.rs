@@ -143,6 +143,22 @@ pub struct PromoCredited {
 }
 
 #[event]
+pub struct MandateCreated {
+    pub owner: Pubkey,
+    pub kind: u8,
+    pub amount_per_period: u64,
+    pub period_secs: i64,
+    pub next_charge_at: i64,
+}
+
+#[event]
+pub struct MandateCancelled {
+    pub owner: Pubkey,
+    pub kind: u8,
+    pub by: Pubkey,
+}
+
+#[event]
 pub struct AccountMigrated {
     pub account: Pubkey,
     pub from_size: u32,

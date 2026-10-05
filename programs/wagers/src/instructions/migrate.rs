@@ -45,6 +45,8 @@ pub fn migrate_account(ctx: Context<MigrateAccount>) -> Result<()> {
         migrate::<Order>(&ctx.accounts, 8 + Order::INIT_SPACE)
     } else if d == PlacementBook::DISCRIMINATOR {
         migrate::<PlacementBook>(&ctx.accounts, 8 + PlacementBook::INIT_SPACE)
+    } else if d == Mandate::DISCRIMINATOR {
+        migrate::<Mandate>(&ctx.accounts, 8 + Mandate::INIT_SPACE)
     } else {
         err!(WagersError::NotMigratable)
     }

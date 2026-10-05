@@ -21,8 +21,9 @@ pub struct Config {
     /// Squads multisig vault in production.
     pub admin: Pubkey,
     pub pending_admin: Pubkey,
-    /// Backend key allowed to lock, settle and credit promos. It can never move funds to
-    /// anything other than entrants' vaults and the treasury.
+    /// Backend key allowed to lock, settle and credit promos. It cannot debit a user vault.
+    /// VIP mandate charges use the separate `biller` key. The biller cannot lock, settle or
+    /// pay promos, and it cannot choose the charge amount or where the tokens go.
     pub settler: Pubkey,
     pub treasury_token: Pubkey,
     pub usdc_mint: Pubkey,
@@ -40,7 +41,12 @@ pub struct Config {
     pub bump: u8,
     pub rewards_bump: u8,
     pub version: u8,
-    pub reserved: [u8; RESERVED_LONG],
+    /// Worker key for `charge_mandate` and worker-side `cancel_mandate`. Carved from the
+    /// old `reserved` tail so existing Config accounts keep their size and every earlier
+    /// field keeps its offset. Zero until `set_biller`. Not the settler.
+    pub biller: Pubkey,
+    /// `RESERVED_LONG` minus the biller pubkey.
+    pub reserved: [u8; 32],
 }
 
 impl Config {
@@ -238,6 +244,25 @@ pub struct Order {
     pub reserved: [u8; RESERVED_SHORT],
 }
 
+/// Recurring vault debit the owner armed. The biller may later move `amount_per_period` to
+/// the treasury and nothing else. One account per `(owner, kind)`.
+#[account]
+#[derive(InitSpace)]
+pub struct Mandate {
+    pub owner: Pubkey,
+    /// `MANDATE_KIND_VIP` today. Also the last PDA seed.
+    pub kind: u8,
+    /// Set by the owner at creation. `charge_mandate` has no amount argument.
+    pub amount_per_period: u64,
+    pub period_secs: i64,
+    /// Unix time of the next allowed charge. A charge sets this to `now + period_secs`.
+    pub next_charge_at: i64,
+    pub rent_payer: Pubkey,
+    pub bump: u8,
+    pub version: u8,
+    pub reserved: [u8; RESERVED_SHORT],
+}
+
 /// Every program account carries a layout `version`, which `migrate_account` brings up to
 /// `ACCOUNT_VERSION`.
 pub trait Versioned {
@@ -258,4 +283,4 @@ macro_rules! versioned {
     )*};
 }
 
-versioned!(Config, UserVault, Contest, Entry, Backing, Order, PlacementBook);
+versioned!(Config, UserVault, Contest, Entry, Backing, Order, PlacementBook, Mandate);

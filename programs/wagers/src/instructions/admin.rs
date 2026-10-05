@@ -124,8 +124,18 @@ pub fn update_config(ctx: Context<AdminOnly>, params: ConfigParams) -> Result<()
 
 pub fn set_settler(ctx: Context<AdminOnly>, settler: Pubkey) -> Result<()> {
     require!(settler != Pubkey::default(), WagersError::InvalidConfig);
+    require!(settler != ctx.accounts.config.biller, WagersError::InvalidConfig);
     ctx.accounts.config.settler = settler;
     emit_config(&ctx.accounts.config);
+    Ok(())
+}
+
+/// Installs the mandate biller. Refuses the settler key so the two roles cannot collapse
+/// into one signer.
+pub fn set_biller(ctx: Context<AdminOnly>, biller: Pubkey) -> Result<()> {
+    require!(biller != Pubkey::default(), WagersError::InvalidConfig);
+    require!(biller != ctx.accounts.config.settler, WagersError::InvalidConfig);
+    ctx.accounts.config.biller = biller;
     Ok(())
 }
 

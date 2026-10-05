@@ -12,7 +12,8 @@ pub struct OpenVault<'info> {
     #[account(mut)]
     pub rent_payer: Signer<'info>,
     /// CHECK: a vault can be opened for any wallet (e.g. at signup, paid by the platform).
-    /// Only that wallet can ever deposit or withdraw from it.
+    /// Only that wallet can deposit or withdraw. The one other debit is a VIP mandate that
+    /// same wallet creates: the biller can then charge its pinned amount to the treasury.
     pub owner: UncheckedAccount<'info>,
     #[account(seeds = [CONFIG_SEED], bump = config.bump)]
     pub config: Box<Account<'info, Config>>,

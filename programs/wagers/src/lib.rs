@@ -1,10 +1,12 @@
 //! bandforband.fun escrow program.
 //!
-//! Custody model: every user balance lives in a per-user vault PDA that only its owner can
-//! withdraw from. Contest stakes and backings move into a per-contest escrow PDA and can
-//! only ever leave it towards entrants' vaults (payouts / refunds) or the treasury (rake,
-//! capped on-chain). If the platform stops settling, anyone can refund a contest after
-//! `refund_timeout_secs`.
+//! Custody model: every user balance lives in a per-user vault PDA. Withdrawals need the
+//! owner's signature. The one other vault debit is a VIP mandate the owner creates: the
+//! separate biller key may then move that mandate's pinned amount to the treasury when it
+//! is due. The settler cannot debit a vault. Contest stakes and backings move into a
+//! per-contest escrow PDA and can only ever leave it towards entrants' vaults (payouts /
+//! refunds) or the treasury (rake, capped on-chain). If the platform stops settling, anyone
+//! can refund a contest after `refund_timeout_secs`.
 #![allow(unexpected_cfgs)]
 
 use anchor_lang::prelude::*;
@@ -46,6 +48,10 @@ pub mod wagers {
 
     pub fn set_settler(ctx: Context<AdminOnly>, settler: Pubkey) -> Result<()> {
         admin::set_settler(ctx, settler)
+    }
+
+    pub fn set_biller(ctx: Context<AdminOnly>, biller: Pubkey) -> Result<()> {
+        admin::set_biller(ctx, biller)
     }
 
     pub fn set_paused(ctx: Context<AdminOnly>, paused: bool) -> Result<()> {
@@ -153,6 +159,24 @@ pub mod wagers {
 
     pub fn purchase(ctx: Context<Purchase>, order_id: [u8; 16], amount: u64) -> Result<()> {
         commerce::purchase(ctx, order_id, amount)
+    }
+
+    pub fn create_mandate(
+        ctx: Context<CreateMandate>,
+        kind: u8,
+        amount_per_period: u64,
+        period_secs: i64,
+        next_charge_at: i64,
+    ) -> Result<()> {
+        mandate::create_mandate(ctx, kind, amount_per_period, period_secs, next_charge_at)
+    }
+
+    pub fn charge_mandate(ctx: Context<ChargeMandate>, order_id: [u8; 16]) -> Result<()> {
+        mandate::charge_mandate(ctx, order_id)
+    }
+
+    pub fn cancel_mandate(ctx: Context<CancelMandate>) -> Result<()> {
+        mandate::cancel_mandate(ctx)
     }
 
     pub fn tip(ctx: Context<Tip>, order_id: [u8; 16], amount: u64, fee: u64) -> Result<()> {

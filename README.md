@@ -5,6 +5,7 @@ Open-source Solana [Anchor](https://www.anchor-lang.com/) program for [bandforba
 ## What it does
 
 - Per-user USDC vault PDAs (only the owner can withdraw)
+- Optional VIP auto-renew mandates: the vault owner arms a fixed recurring amount; a separate `biller` key (never the settler) can only move that pinned amount to the on-chain treasury when due. Owner or biller can cancel.
 - Per-contest escrow for stakes and backings
 - On-chain settlement with capped rake to treasury
 - Permissionless refund path if a contest is not settled before `refund_timeout_secs`

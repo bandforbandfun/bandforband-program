@@ -8,7 +8,7 @@ use crate::math;
 use crate::state::*;
 use crate::token_util;
 
-fn record_order(
+pub(crate) fn record_order(
     order: &mut Order,
     id: [u8; 16],
     kind: OrderKind,
